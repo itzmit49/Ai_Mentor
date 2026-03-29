@@ -13,7 +13,8 @@ function App() {
     
     setTimeout(() => {
       // 1. Data parsing
-      const { age, income, expenses, emis, cash, investments, dependents, goal, horizon, risk } = userData;
+      const { name, age, income, expenses, emis, cash, investments, dependents, goal, horizon, risk } = userData;
+      const parsedName = name ? name.trim().split(' ')[0] : '';
       const parsedAge = Number(age) || 30;
       const parsedIncome = Number(income) || 75000;
       const parsedExpenses = Number(expenses) || 30000;
@@ -152,7 +153,7 @@ function App() {
           { subject: 'Retirement', A: scoreRetirement },
           { subject: 'Diversity', A: scoreDiversification }
         ],
-        summary: `You have a ${savingsRate.toFixed(1)}% savings rate. We generated a ${adjustedRisk.toLowerCase()} wealth protocol targeted for ${parsedHorizon} years.`,
+        summary: `${parsedName ? 'Hi ' + parsedName + '! ' : ''}You have a ${savingsRate.toFixed(1)}% savings rate. We generated a ${adjustedRisk.toLowerCase()} wealth protocol targeted for ${parsedHorizon} years.`,
         
         ai_thinking: aiThinking,
         problems_detected: [],

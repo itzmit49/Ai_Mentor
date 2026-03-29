@@ -4,6 +4,7 @@ import { AlertTriangle, Activity, Target, BrainCircuit, ChevronRight, Zap, Info,
 import { motion, AnimatePresence } from 'framer-motion';
 import CouplesPlanner from './CouplesPlanner';
 import LifeEventSimulator from './LifeEventSimulator';
+import RebalancingPlan from './RebalancingPlan';
 
 const MoneyHealthDashboard = ({ aiData }) => {
   if (!aiData) return null;
@@ -14,6 +15,7 @@ const MoneyHealthDashboard = ({ aiData }) => {
   const [completedActions, setCompletedActions] = useState(new Set());
   const [showCouplesPlanner, setShowCouplesPlanner] = useState(false);
   const [showLifeSimulator, setShowLifeSimulator] = useState(false);
+  const [showRebalancingPlan, setShowRebalancingPlan] = useState(false);
 
   const handleActionClick = (actionLabel) => {
     if (completedActions.has(actionLabel)) return;
@@ -178,7 +180,7 @@ const MoneyHealthDashboard = ({ aiData }) => {
                    </div>
                 </div>
                 <div className="mt-auto">
-                   <p className="text-xs text-fuchsia-400 font-bold text-center border border-fuchsia-500/20 bg-fuchsia-500/10 py-2 rounded-lg cursor-pointer hover:bg-fuchsia-500/20 transition-colors">Generate Rebalancing Plan →</p>
+                   <button onClick={() => setShowRebalancingPlan(true)} className="w-full text-xs text-fuchsia-400 font-bold text-center border border-fuchsia-500/20 bg-fuchsia-500/10 py-2 rounded-lg cursor-pointer hover:bg-fuchsia-500/20 transition-colors">Generate Rebalancing Plan →</button>
                 </div>
              </div>
           </motion.div>
@@ -255,7 +257,7 @@ const MoneyHealthDashboard = ({ aiData }) => {
                         {isLoading && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent w-full h-full animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }} />}
                         <span className="flex items-center gap-2 z-10">
                           {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" /> : isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Zap className="w-3.5 h-3.5 text-amber-400 group-hover:text-amber-300" />}
-                          <span className="truncate pr-2">{isCompleted ? "Initiated" : isLoading ? `Processing...` : action.label}</span>
+                          <span className="truncate pr-2">{isCompleted ? action.label : isLoading ? `Processing...` : action.label}</span>
                         </span>
                         {!isCompleted && !isLoading && <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1" />}
                       </button>
@@ -275,6 +277,7 @@ const MoneyHealthDashboard = ({ aiData }) => {
         <AnimatePresence>
           {showCouplesPlanner && <CouplesPlanner onClose={() => setShowCouplesPlanner(false)} />}
           {showLifeSimulator && <LifeEventSimulator onClose={() => setShowLifeSimulator(false)} currentSip={monthlySip} currentTarget={10000000} timeline={parseInt(aiData.goal_plan.timeline) || 10} />}
+          {showRebalancingPlan && <RebalancingPlan onClose={() => setShowRebalancingPlan(false)} overlapPercentage={aiData.portfolio_xray.overlap} expenseDrag={aiData.portfolio_xray.exp_drag} />}
         </AnimatePresence>
 
       </div>

@@ -50,22 +50,22 @@ const LifeEventSimulator = ({ onClose, currentSip = 50000, currentTarget = 10000
         exit={{ opacity: 0, scale: 0.95 }}
         className="w-full max-w-4xl bg-slate-900 border border-slate-700 shadow-2xl rounded-3xl overflow-hidden relative flex flex-col md:flex-row"
       >
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition-colors z-10 md:hidden">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition-colors z-10 md:hidden hidden">
           <X className="w-5 h-5" />
         </button>
 
         {/* Left Side: Events List */}
-        <div className="w-full md:w-5/12 border-r border-slate-800 bg-slate-900 p-6 flex flex-col max-h-[70vh] md:max-h-[600px] overflow-y-auto">
-          <div className="hidden md:flex justify-between items-start mb-6">
+        <div className="w-full md:w-5/12 border-r border-slate-800 bg-slate-900 p-6 flex flex-col max-h-[85vh] md:max-h-[600px] overflow-y-auto">
+          <div className="flex flex-col gap-4 mb-6 mt-4 md:mt-0">
+            <button onClick={onClose} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-5 py-2.5 rounded-xl text-sm font-bold border border-slate-700 transition-colors shadow-lg w-full justify-center">
+              ← Back to Dashboard
+            </button>
             <div>
               <h2 className="text-xl font-bold flex items-center gap-2 text-amber-400">
                 <PartyPopper className="w-5 h-5" /> Event Simulator
               </h2>
               <p className="text-xs text-slate-400 mt-1">See the impact of large expenses.</p>
             </div>
-            <button onClick={onClose} className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition-colors hidden md:block">
-              <X className="w-4 h-4" />
-            </button>
           </div>
           
           <div className="space-y-3 mt-4 md:mt-0 flex-1">

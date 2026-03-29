@@ -7,34 +7,61 @@ const CouplesPlanner = ({ onClose }) => {
   const [partner2, setPartner2] = useState({ name: 'Priya', income: 1500000, regime: 'new', paysRent: false });
   const [rentAmount, setRentAmount] = useState(40000);
 
-  // Simplified tax calculation logic for demonstration
-  const calculateTax = (income, regime, isPayingRent) => {
-    let taxable = income;
-    if (regime === 'old') {
-      taxable -= 50000; // Standard deduction
-      if (isPayingRent) taxable -= (rentAmount * 12 * 0.5); // Simplified HRA exemption
-      taxable -= 150000; // 80C
-    } else {
-      taxable -= 50000; // Standard deduction new regime
-    }
+  // Realistic Indian Tax Calculation (Simplified FY 24-25 Slubs)
+  const calculateTax = (incomeAmount, regime, isPayingRent) => {
+    const income = Number(incomeAmount) || 0;
+    let taxable = Math.max(0, income - 50000); // Standard deduction
     
-    // Simple bracket calculation
-    let tax = 0;
-    if (taxable > 700000) {
-      tax = (taxable - 700000) * 0.2 + 25000; // Mock calculation
+    if (regime === 'old') {
+      if (isPayingRent) {
+        // Simplified HRA Exemption (Assuming basic is 50% of income)
+        const basic = income * 0.5;
+        const hraExemption = Math.min(rentAmount * 12 - (0.1 * basic), basic * 0.5, rentAmount * 12);
+        taxable -= Math.max(0, hraExemption);
+      }
+      taxable -= 150000; // 80C
+
+      if (taxable <= 500000) return { tax: 0, taxable: Math.max(0, taxable) }; // 87A rebate
+      
+      let tax = 0;
+      if (taxable > 1000000) {
+        tax += (taxable - 1000000) * 0.3 + 112500;
+      } else if (taxable > 500000) {
+        tax += (taxable - 500000) * 0.2 + 12500;
+      } else if (taxable > 250000) {
+        tax += (taxable - 250000) * 0.05;
+      }
+      return { tax: Math.round(tax * 1.04), taxable }; // Cess
+    } else {
+      if (taxable <= 700000) return { tax: 0, taxable: Math.max(0, taxable) }; // 87A rebate
+      
+      let tax = 0;
+      if (taxable > 1500000) {
+         tax += (taxable - 1500000) * 0.3 + 150000;
+      } else if (taxable > 1200000) {
+         tax += (taxable - 1200000) * 0.2 + 90000;
+      } else if (taxable > 900000) {
+         tax += (taxable - 900000) * 0.15 + 45000;
+      } else if (taxable > 600000) {
+         tax += (taxable - 600000) * 0.1 + 15000;
+      } else if (taxable > 300000) {
+         tax += (taxable - 300000) * 0.05;
+      }
+      return { tax: Math.round(tax * 1.04), taxable }; // Cess
     }
-    return Math.max(0, tax);
   };
 
-  const p1Tax = calculateTax(partner1.income, partner1.regime, partner1.paysRent);
-  const p2Tax = calculateTax(partner2.income, partner2.regime, partner2.paysRent);
+  const p1Calc = calculateTax(partner1.income, partner1.regime, partner1.paysRent);
+  const p2Calc = calculateTax(partner2.income, partner2.regime, partner2.paysRent);
 
   // Optimization logic: who should pay rent?
-  const altP1Tax = calculateTax(partner1.income, partner1.regime, false);
-  const altP2Tax = calculateTax(partner2.income, partner2.regime, true);
+  const altP1Calc = calculateTax(partner1.income, partner1.regime, false);
+  const altP2Calc = calculateTax(partner2.income, partner2.regime, true);
 
+  const p1Tax = p1Calc.tax;
+  const p2Tax = p2Calc.tax;
   const currentTotal = p1Tax + p2Tax;
-  const optimizedTotal = altP1Tax + altP2Tax;
+  const optimizedTotal = altP1Calc.tax + altP2Calc.tax;
   const savings = currentTotal - optimizedTotal;
   const isOptimal = savings <= 0;
 
@@ -50,14 +77,19 @@ const CouplesPlanner = ({ onClose }) => {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-6 md:p-8 border-b border-slate-800 bg-slate-900">
-          <h2 className="text-2xl font-bold flex items-center gap-3 text-pink-400">
-            <HeartPulse className="w-6 h-6" /> Couple's Wealth Planner
-          </h2>
-          <p className="text-sm text-slate-400 mt-2">Optimize joint tax brackets, HRA splitting, and dual-income compounding.</p>
+        <div className="p-6 md:p-8 border-b border-slate-800 bg-slate-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold flex items-center gap-3 text-pink-400">
+              <HeartPulse className="w-6 h-6" /> Couple's Wealth Planner
+            </h2>
+            <p className="text-sm text-slate-400 mt-2">Optimize joint tax brackets, HRA splitting, and dual-income compounding.</p>
+          </div>
+          <button onClick={onClose} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-5 py-2.5 rounded-xl text-sm font-bold border border-slate-700 transition-colors shadow-lg w-full md:w-auto justify-center">
+            ← Back to Dashboard
+          </button>
         </div>
 
-        <div className="p-6 md:p-8 bg-slate-950/50">
+        <div className="p-6 md:p-8 bg-slate-950/50 overflow-y-auto max-h-[70vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Partner 1 */}
             <div className="space-y-4">
@@ -70,7 +102,7 @@ const CouplesPlanner = ({ onClose }) => {
               </div>
               <div>
                 <label className="text-xs text-slate-500 font-bold uppercase">Annual Income (₹)</label>
-                <input type="number" value={partner1.income} onChange={e => setPartner1({...partner1, income: Number(e.target.value)})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 mt-1 text-sm text-white focus:border-pink-500 outline-none" />
+                <input type="number" value={partner1.income} onChange={e => setPartner1({...partner1, income: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 mt-1 text-sm text-white focus:border-pink-500 outline-none" />
               </div>
               <div className="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700">
                 <span className="text-sm font-medium text-slate-300">Pays the Rent?</span>
@@ -93,7 +125,7 @@ const CouplesPlanner = ({ onClose }) => {
               </div>
               <div>
                 <label className="text-xs text-slate-500 font-bold uppercase">Annual Income (₹)</label>
-                <input type="number" value={partner2.income} onChange={e => setPartner2({...partner2, income: Number(e.target.value)})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 mt-1 text-sm text-white focus:border-pink-500 outline-none" />
+                <input type="number" value={partner2.income} onChange={e => setPartner2({...partner2, income: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 mt-1 text-sm text-white focus:border-pink-500 outline-none" />
               </div>
               <div className="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700">
                 <span className="text-sm font-medium text-slate-300">Pays the Rent?</span>
@@ -121,7 +153,7 @@ const CouplesPlanner = ({ onClose }) => {
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
                  <p className="text-xs text-slate-500 font-bold mb-1">Current Tax Liability</p>
                  <p className="text-2xl font-black text-slate-200">₹{currentTotal.toLocaleString()}</p>
-                 <p className="text-xs text-slate-400 mt-1">{partner1.name}: ₹{p1Tax.toLocaleString()} + {partner2.name}: ₹{p2Tax.toLocaleString()}</p>
+                 <p className="text-xs text-slate-400 mt-1">{partner1.name}: ₹{p1Tax.toLocaleString()} (on ₹{(p1Calc.taxable/100000).toFixed(1)}L base) <br/> {partner2.name}: ₹{p2Tax.toLocaleString()} (on ₹{(p2Calc.taxable/100000).toFixed(1)}L base)</p>
               </div>
               <div className={`p-4 rounded-xl border ${savings > 0 ? 'bg-emerald-950/30 border-emerald-500/30' : 'bg-slate-950 border-slate-800'}`}>
                  <p className="text-xs text-slate-500 font-bold mb-1">Optimized Tax Liability</p>

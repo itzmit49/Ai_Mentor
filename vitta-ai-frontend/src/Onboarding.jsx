@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Wallet, Target, Activity, TrendingUp, Sparkles, ShieldAlert, CreditCard, Users, Clock, Landmark } from 'lucide-react';
 
 const Onboarding = ({ onComplete }) => {
+  const [hasStarted, setHasStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
+    name: '',
     age: '',
     income: '',
     expenses: '',
@@ -35,6 +37,11 @@ const Onboarding = ({ onComplete }) => {
   };
 
   const questions = [
+    {
+      id: 'name', question: "What should we call you?", title: "Nice to meet you",
+      subtitle: "Let's personalize your FinMentor experience.",
+      icon: <Sparkles className="w-8 h-8 text-fuchsia-400" />, type: "text", placeholder: "e.g. Rahul"
+    },
     {
       id: 'age', question: "What's your current age?", title: "Let's get started",
       subtitle: "To build your personalized roadmap, we need some basic details.",
@@ -97,6 +104,36 @@ const Onboarding = ({ onComplete }) => {
   ];
 
   const currentQ = questions[step];
+
+  if (!hasStarted) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-cyan-500/30">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-cyan-500/10 blur-[150px] pointer-events-none rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full" />
+        
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="z-10 text-center max-w-2xl px-4">
+          <div className="mx-auto w-24 h-24 mb-8 bg-slate-900 border border-slate-700/50 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(34,211,238,0.2)]">
+            <Sparkles className="w-10 h-10 text-cyan-400" />
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-indigo-400 mb-6 tracking-tight drop-shadow-sm">
+            Your Personal AI Money Mentor
+          </h1>
+          
+          <p className="text-lg md:text-xl text-slate-400 font-medium mb-12 max-w-xl mx-auto leading-relaxed">
+            Discover your true financial health score, verify your FIRE journey, and optimize your taxes automatically.
+          </p>
+          
+          <button 
+            onClick={() => setHasStarted(true)} 
+            className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white px-10 py-5 rounded-full font-bold text-lg shadow-[0_10px_40px_rgba(16,185,129,0.3)] transition-all hover:scale-105 hover:-translate-y-1 flex items-center justify-center gap-3 w-full sm:w-auto mx-auto"
+          >
+            Start Free Assessment <ArrowRight className="w-5 h-5" />
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-cyan-500/30">
